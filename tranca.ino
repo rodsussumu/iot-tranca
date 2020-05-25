@@ -18,23 +18,63 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 
 void setup(){
   Serial.begin(9600);
+}
 
+String leStringSerial(){
+  String conteudo = "";
+  char caractere;
+  
+  while(Serial.available() > 0) {
+    caractere = Serial.read();
+    if (caractere != '\n'){
+      conteudo.concat(caractere);
+    }
+    delay(10);
+  }
+    
+  Serial.print("Recebi: ");
+  Serial.println(conteudo);
+    
+  return conteudo;
 }
 
 String senha = "123";
 String tentativa;
+int contador = 0;
 
 void loop(){
+  while(contador < 3){
   char keyStroke = customKeypad.getKey();
-  
   if(keyStroke) {
     tentativa += keyStroke;
     Serial.println(tentativa);
-    if(tentativa == senha){
-    delay(500);
-    Serial.println("Acesso autorizado");
-    delay(500);
+    if(tentativa.length() == 3) {
+        if(tentativa == senha){
+            delay(500);
+            Serial.println("Acesso autorizado");
+            delay(500);
+  	    }else {
+            Serial.print("Senha incorreta");
+            tentativa = "";
+          	contador++;
+        }
+    }
   } 
   }
+  delay(500);
+  Serial.println("Acesso bloqueado");
+  delay(500);
   
+  if (Serial.available() > 0){
+    String recebido = leStringSerial();
+      
+    if (recebido == "foobar"){
+      contador = 0;
+      Serial.print("Tente novamente, limite de 3 tentativas")
+    }
+      
+    if (recebido != "foobar"){
+      Serial.print("Digite foobar para tentar novamente");
+    }
+  }
 }
